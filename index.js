@@ -16,42 +16,12 @@ var sql = '';
 
 // Process a single fixture file
 function processFixture(oflFixture, manufacturerShortName) {
-    // Map the OFL fixture to a Show Designer fixture
-    let sdFixture = {};
-
-    sdFixture.shortName = oflFixture.shortName;
-    sdFixture.name = oflFixture.name;
-    if (oflFixture.links) {
-        sdFixture.manualLink = oflFixture.links.manual;
-        sdFixture.videoLink = oflFixture.links.video;
-    }
-    sdFixture.modes = [];
-    if (oflFixture.modes) {
-        for (let oflMode of oflFixture.modes) {
-            let sdMode = {};
-
-            for (let oflModeChannel of oflMode.channels) {
-                let oflChannel;
-                console.log(manufacturerShortName, oflFixture.name, oflModeChannel);
-                // Find the corresponding channel
-                for (let oflAvailableChannel in oflFixture.availableChannels) {
-                    if (oflAvailableChannel == oflModeChannel) {
-                        oflChannel = oflFixture.availableChannels[oflAvailableChannel];
-                        break;
-                    }
-                }
-
-                if (oflChannel) {
-                    //console.log('FFFF', oflModeChannel);
-                }
-            }
-
-            sdFixture.modes.push(sdMode);
-        }
-    }
-
     sql += "DELETE FROM fixture WHERE name = '" + oflFixture.name + "' AND manufacturer_short_name = '" + manufacturerShortName + "';\n";
-    sql += "INSERT INTO fixture(name, manufacturer_short_name, object) VALUES('" + oflFixture.name + "', '" + manufacturerShortName + "', '" + JSON.stringify(sdFixture) + "');\n";
+
+    let object = JSON.stringify(oflFixture);
+    object = object.replace(/'/g, "\\'");
+
+    sql += "INSERT INTO fixture(name, manufacturer_short_name, object) VALUES('" + oflFixture.name + "', '" + manufacturerShortName + "', '" + object + "');\n";
 }
 
 // Process all fixture files inside a manufacturer directory
