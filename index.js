@@ -21,9 +21,37 @@ function processFixture(oflFixture, manufacturerShortName) {
 
     sdFixture.shortName = oflFixture.shortName;
     sdFixture.name = oflFixture.name;
+    if (oflFixture.links) {
+        sdFixture.manualLink = oflFixture.links.manual;
+        sdFixture.videoLink = oflFixture.links.video;
+    }
+    sdFixture.modes = [];
+    if (oflFixture.modes) {
+        for (let oflMode of oflFixture.modes) {
+            let sdMode = {};
 
-    sql += "DELETE FROM fixture WHERE name = '" + oflFixture.name + "' AND manufacturer = '" + manufacturerShortName + "';\n";
-    sql += "INSERT INTO fixture(name, object) VALUES('" + oflFixture.name + "', '" + JSON.stringify(sdFixture) + "');\n";
+            for (let oflModeChannel of oflMode.channels) {
+                let oflChannel;
+                console.log(manufacturerShortName, oflFixture.name, oflModeChannel);
+                // Find the corresponding channel
+                for (let oflAvailableChannel in oflFixture.availableChannels) {
+                    if (oflAvailableChannel == oflModeChannel) {
+                        oflChannel = oflFixture.availableChannels[oflAvailableChannel];
+                        break;
+                    }
+                }
+
+                if (oflChannel) {
+                    //console.log('FFFF', oflModeChannel);
+                }
+            }
+
+            sdFixture.modes.push(sdMode);
+        }
+    }
+
+    sql += "DELETE FROM fixture WHERE name = '" + oflFixture.name + "' AND manufacturer_short_name = '" + manufacturerShortName + "';\n";
+    sql += "INSERT INTO fixture(name, manufacturer_short_name, object) VALUES('" + oflFixture.name + "', '" + manufacturerShortName + "', '" + JSON.stringify(sdFixture) + "');\n";
 }
 
 // Process all fixture files inside a manufacturer directory
@@ -39,8 +67,8 @@ function processManufacturer(shortName, manufacturer) {
     const directoryPath = path.join(__dirname, filePath);
 
     let files = fs.readdirSync(directoryPath);
-    
-    for(let file of files) {
+
+    for (let file of files) {
         processFixture(JSON.parse(fs.readFileSync(filePath + '/' + file)), shortName);
     }
 
@@ -55,8 +83,8 @@ function main() {
     sql += "-- # Time: " + new Date() + "\n";
     sql += "-- ####################\n";
     sql += "\n";
-    sql += "DELETE FROM manufacturer;\n";
     sql += "DELETE FROM fixture;\n";
+    sql += "DELETE FROM manufacturer;\n";
     sql += "\n";
 
     // Read the manufacturer file
