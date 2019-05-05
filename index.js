@@ -16,12 +16,16 @@ var sql = '';
 
 // Process a single fixture file
 function processFixture(oflFixture, manufacturerShortName) {
-    sql += "DELETE FROM fixture WHERE name = '" + oflFixture.name + "' AND manufacturer_short_name = '" + manufacturerShortName + "';\n";
-
     let object = JSON.stringify(oflFixture);
     object = object.replace(/'/g, "\\'");
 
-    sql += "INSERT INTO fixture(name, manufacturer_short_name, object) VALUES('" + oflFixture.name + "', '" + manufacturerShortName + "', '" + object + "');\n";
+    let mainCategory = 'null';
+
+    if(oflFixture.categories) {
+        mainCategory = oflFixture.categories[0];
+    }
+
+    sql += "INSERT INTO fixture(uuid, name, manufacturer_short_name, main_category, object) VALUES('" + manufacturerShortName + "/" + oflFixture.name + "', '" + oflFixture.name + "', '" + manufacturerShortName + "', '" + mainCategory + "', '" + object + "');\n";
 }
 
 // Process all fixture files inside a manufacturer directory
@@ -30,7 +34,6 @@ function processManufacturer(shortName, manufacturer) {
 
     // Create the SQL for the manufacturer
     sql += "-- " + shortName + "\n";
-    sql += "DELETE FROM manufacturer WHERE short_name = '" + shortName + "';\n";
     sql += "INSERT INTO manufacturer(short_name, name, website) VALUES('" + shortName + "', '" + manufacturer.name + "', '" + manufacturer.website + "');\n";
 
     // Process each fixture for this manufacturer
