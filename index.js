@@ -15,7 +15,7 @@ const sqlFilPath = 'import.sql';
 var sql = '';
 
 // Process a single fixture file
-function processFixture(oflFixture, manufacturerShortName) {
+function processFixture(oflFixture, oflFixtureName, manufacturerShortName) {
     let object = JSON.stringify(oflFixture);
     object = object.replace(/'/g, "\\'");
 
@@ -25,7 +25,7 @@ function processFixture(oflFixture, manufacturerShortName) {
         mainCategory = oflFixture.categories[0];
     }
 
-    sql += "INSERT INTO fixture(uuid, name, manufacturer_short_name, main_category, object) VALUES('" + manufacturerShortName + "/" + oflFixture.name + "', '" + oflFixture.name + "', '" + manufacturerShortName + "', '" + mainCategory + "', '" + object + "');\n";
+    sql += "INSERT INTO fixture(uuid, name, manufacturer_short_name, main_category, object) VALUES('" + manufacturerShortName + "/" + oflFixtureName + "', '" + oflFixture.name + "', '" + manufacturerShortName + "', '" + mainCategory + "', '" + object + "');\n";
 }
 
 // Process all fixture files inside a manufacturer directory
@@ -42,7 +42,7 @@ function processManufacturer(shortName, manufacturer) {
     let files = fs.readdirSync(directoryPath);
 
     for (let file of files) {
-        processFixture(JSON.parse(fs.readFileSync(filePath + '/' + file)), shortName);
+        processFixture(JSON.parse(fs.readFileSync(filePath + '/' + file)), file.substr(0, file.length - 5), shortName);
     }
 
     sql += "\n";
